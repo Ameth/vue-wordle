@@ -1,5 +1,5 @@
-<script setup lang="ts">
-import { onUnmounted } from 'vue'
+<script setup>
+import { onUnmounted, ref, computed, reactive } from 'vue'
 import { getWordOfTheDay, allWords } from './words'
 import Keyboard from './Keyboard.vue'
 import { LetterState } from './types'
@@ -7,8 +7,10 @@ import { LetterState } from './types'
 // Get word of the day
 const answer = getWordOfTheDay()
 
+// console.log("answer day:", answer);
+
 // Board state. Each tile is represented as { letter, state }
-const board = $ref(
+const board = ref(
   Array.from({ length: 6 }, () =>
     Array.from({ length: 5 }, () => ({
       letter: '',
@@ -17,23 +19,29 @@ const board = $ref(
   )
 )
 
+
 // Current active row.
-let currentRowIndex = $ref(0)
-const currentRow = $computed(() => board[currentRowIndex])
+let currentRowIndex = ref(0)
+const currentRow = computed(() => board.value[currentRowIndex.value])
+
+// console.log("current:", currentRow.value);
 
 // Feedback state: message and shake
-let message = $ref('')
-let grid = $ref('')
-let shakeRowIndex = $ref(-1)
-let success = $ref(false)
+let message = ref('')
+let grid = ref('')
+let shakeRowIndex = ref(-1)
+let success = ref(false)
 
 // Keep track of revealed letters for the virtual keyboard
-const letterStates: Record<string, LetterState> = $ref({})
+const letterStates = reactive({})
 
 // Handle keyboard input.
 let allowInput = true
 
-const onKeyup = (e: KeyboardEvent) => onKey(e.key)
+const onKeyup = (e) => {
+  // console.log(e.key);
+  onKey(e.key)
+}
 
 window.addEventListener('keyup', onKeyup)
 
@@ -41,9 +49,9 @@ onUnmounted(() => {
   window.removeEventListener('keyup', onKeyup)
 })
 
-function onKey(key: string) {
+function onKey(key) {
   if (!allowInput) return
-  if (/^[a-zA-Z]$/.test(key)) {
+  if (/^[a-zA-Z\u00f1\u00d1]$/.test(key)) {
     fillTile(key.toLowerCase())
   } else if (key === 'Backspace') {
     clearTile()
@@ -52,8 +60,11 @@ function onKey(key: string) {
   }
 }
 
-function fillTile(letter: string) {
-  for (const tile of currentRow) {
+function fillTile(letter) {
+
+  // console.log(currentRow);
+
+  for (const tile of currentRow.value) {
     if (!tile.letter) {
       tile.letter = letter
       break
@@ -62,7 +73,7 @@ function fillTile(letter: string) {
 }
 
 function clearTile() {
-  for (const tile of [...currentRow].reverse()) {
+  for (const tile of [...currentRow.value].reverse()) {
     if (tile.letter) {
       tile.letter = ''
       break
@@ -71,24 +82,24 @@ function clearTile() {
 }
 
 function completeRow() {
-  if (currentRow.every((tile) => tile.letter)) {
-    const guess = currentRow.map((tile) => tile.letter).join('')
+  if (currentRow.value.every((tile) => tile.letter)) {
+    const guess = currentRow.value.map((tile) => tile.letter).join('')
     if (!allWords.includes(guess) && guess !== answer) {
       shake()
-      showMessage(`Not in word list`)
+      showMessage(`La palabra no está en la lista`)
       return
     }
 
-    const answerLetters: (string | null)[] = answer.split('')
-    // first pass: mark correct ones
-    currentRow.forEach((tile, i) => {
+    const answerLetters = answer.split('')
+    // Primer paso: marcar las letras correctas
+    currentRow.value.forEach((tile, i) => {
       if (answerLetters[i] === tile.letter) {
         tile.state = letterStates[tile.letter] = LetterState.CORRECT
         answerLetters[i] = null
       }
     })
-    // second pass: mark the present
-    currentRow.forEach((tile) => {
+    // Segundo paso: marcar las letras presentes
+    currentRow.value.forEach((tile) => {
       if (!tile.state && answerLetters.includes(tile.letter)) {
         tile.state = LetterState.PRESENT
         answerLetters[answerLetters.indexOf(tile.letter)] = null
@@ -97,8 +108,8 @@ function completeRow() {
         }
       }
     })
-    // 3rd pass: mark absent
-    currentRow.forEach((tile) => {
+    // Tercer paso: marcar las letras ausentes
+    currentRow.value.forEach((tile) => {
       if (!tile.state) {
         tile.state = LetterState.ABSENT
         if (!letterStates[tile.letter]) {
@@ -108,49 +119,47 @@ function completeRow() {
     })
 
     allowInput = false
-    if (currentRow.every((tile) => tile.state === LetterState.CORRECT)) {
-      // yay!
+    if (currentRow.value.every((tile) => tile.state === LetterState.CORRECT)) {
+      // Ganaste!!
       setTimeout(() => {
-        grid = genResultGrid()
+        grid.value = genResultGrid()
         showMessage(
-          ['Genius', 'Magnificent', 'Impressive', 'Splendid', 'Great', 'Phew'][
-            currentRowIndex
-          ],
+          ['Genio', 'Magnífico', 'Impresionante', 'Espléndido', 'Bien', '¡Uf!'][currentRowIndex.value],
           -1
         )
-        success = true
+        success.value = true
       }, 1600)
-    } else if (currentRowIndex < board.length - 1) {
-      // go the next row
-      currentRowIndex++
+    } else if (currentRowIndex.value < board.value.length - 1) {
+      // Ir a la siguiente fila
+      currentRowIndex.value++
       setTimeout(() => {
         allowInput = true
       }, 1600)
     } else {
-      // game over :(
+      // Juego perdido :(
       setTimeout(() => {
         showMessage(answer.toUpperCase(), -1)
       }, 1600)
     }
   } else {
     shake()
-    showMessage('Not enough letters')
+    showMessage('No pueden faltar letras')
   }
 }
 
-function showMessage(msg: string, time = 1000) {
-  message = msg
+function showMessage(msg, time = 1000) {
+  message.value = msg
   if (time > 0) {
     setTimeout(() => {
-      message = ''
+      message.value = ''
     }, time)
   }
 }
 
 function shake() {
-  shakeRowIndex = currentRowIndex
+  shakeRowIndex.value = currentRowIndex.value
   setTimeout(() => {
-    shakeRowIndex = -1
+    shakeRowIndex.value = -1
   }, 1000)
 }
 
@@ -162,8 +171,8 @@ const icons = {
 }
 
 function genResultGrid() {
-  return board
-    .slice(0, currentRowIndex + 1)
+  return board.value
+    .slice(0, currentRowIndex.value + 1)
     .map((row) => {
       return row.map((tile) => icons[tile.state]).join('')
     })
@@ -179,37 +188,23 @@ function genResultGrid() {
     </div>
   </Transition>
   <header>
-    <h1>VVORDLE</h1>
-    <a
-      id="source-link"
-      href="https://github.com/yyx990803/vue-wordle"
-      target="_blank"
-      >Source</a
-    >
+    <h1>VVORDLE ESPAÑOL</h1>
+    <a id="source-link" href="https://github.com/Ameth/vue-wordle" target="_blank">Source</a>
   </header>
   <div id="board">
-    <div
-      v-for="(row, index) in board"
-      :class="[
-        'row',
-        shakeRowIndex === index && 'shake',
-        success && currentRowIndex === index && 'jump'
-      ]"
-    >
-      <div
-        v-for="(tile, index) in row"
-        :class="['tile', tile.letter && 'filled', tile.state && 'revealed']"
-      >
+    <div v-for="(row, index) in board" :class="[
+      'row',
+      shakeRowIndex === index && 'shake',
+      success && currentRowIndex === index && 'jump'
+    ]">
+      <div v-for="(tile, index) in row" :class="['tile', tile.letter && 'filled', tile.state && 'revealed']">
         <div class="front" :style="{ transitionDelay: `${index * 300}ms` }">
           {{ tile.letter }}
         </div>
-        <div
-          :class="['back', tile.state]"
-          :style="{
-            transitionDelay: `${index * 300}ms`,
-            animationDelay: `${index * 100}ms`
-          }"
-        >
+        <div :class="['back', tile.state]" :style="{
+          transitionDelay: `${index * 300}ms`,
+          animationDelay: `${index * 100}ms`
+        }">
           {{ tile.letter }}
         </div>
       </div>
@@ -230,6 +225,7 @@ function genResultGrid() {
   width: min(350px, calc(var(--height) / 6 * 5));
   margin: 0px auto;
 }
+
 .message {
   position: absolute;
   left: 50%;
@@ -243,14 +239,17 @@ function genResultGrid() {
   transition: opacity 0.3s ease-out;
   font-weight: 600;
 }
+
 .message.v-leave-to {
   opacity: 0;
 }
+
 .row {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   grid-gap: 5px;
 }
+
 .tile {
   width: 100%;
   font-size: 2rem;
@@ -261,9 +260,11 @@ function genResultGrid() {
   user-select: none;
   position: relative;
 }
+
 .tile.filled {
   animation: zoom 0.2s;
 }
+
 .tile .front,
 .tile .back {
   box-sizing: border-box;
@@ -279,18 +280,23 @@ function genResultGrid() {
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
+
 .tile .front {
   border: 2px solid #d3d6da;
 }
+
 .tile.filled .front {
   border-color: #999;
 }
+
 .tile .back {
   transform: rotateX(180deg);
 }
+
 .tile.revealed .front {
   transform: rotateX(180deg);
 }
+
 .tile.revealed .back {
   transform: rotateX(0deg);
 }
@@ -299,6 +305,7 @@ function genResultGrid() {
   0% {
     transform: scale(1.1);
   }
+
   100% {
     transform: scale(1);
   }
@@ -312,33 +319,43 @@ function genResultGrid() {
   0% {
     transform: translate(1px);
   }
+
   10% {
     transform: translate(-2px);
   }
+
   20% {
     transform: translate(2px);
   }
+
   30% {
     transform: translate(-2px);
   }
+
   40% {
     transform: translate(2px);
   }
+
   50% {
     transform: translate(-2px);
   }
+
   60% {
     transform: translate(2px);
   }
+
   70% {
     transform: translate(-2px);
   }
+
   80% {
     transform: translate(2px);
   }
+
   90% {
     transform: translate(-2px);
   }
+
   100% {
     transform: translate(1px);
   }
@@ -352,15 +369,19 @@ function genResultGrid() {
   0% {
     transform: translateY(0px);
   }
+
   20% {
     transform: translateY(5px);
   }
+
   60% {
     transform: translateY(-25px);
   }
+
   90% {
     transform: translateY(3px);
   }
+
   100% {
     transform: translateY(0px);
   }

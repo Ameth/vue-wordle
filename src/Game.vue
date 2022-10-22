@@ -188,7 +188,7 @@ function genResultGrid() {
     </div>
   </Transition>
   <header>
-    <h1>VVORDLE ESPAÑOL</h1>
+    <h1>WORDLE ESPAÑOL</h1>
     <a id="source-link" href="https://github.com/Ameth/vue-wordle" target="_blank">Source</a>
   </header>
   <div id="board">

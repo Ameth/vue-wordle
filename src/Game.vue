@@ -7,7 +7,7 @@ import { LetterState } from './types'
 // Get word of the day
 const answer = getWordOfTheDay()
 
-// console.log("answer day:", answer);
+// console.log('answer day:', answer)
 
 // Board state. Each tile is represented as { letter, state }
 const board = ref(
@@ -18,7 +18,6 @@ const board = ref(
     }))
   )
 )
-
 
 // Current active row.
 let currentRowIndex = ref(0)
@@ -38,7 +37,7 @@ const letterStates = reactive({})
 // Handle keyboard input.
 let allowInput = true
 
-const onKeyup = (e) => {
+const onKeyup = e => {
   // console.log(e.key);
   onKey(e.key)
 }
@@ -49,7 +48,7 @@ onUnmounted(() => {
   window.removeEventListener('keyup', onKeyup)
 })
 
-function onKey(key) {
+function onKey (key) {
   if (!allowInput) return
   if (/^[a-zA-Z\u00f1\u00d1]$/.test(key)) {
     fillTile(key.toLowerCase())
@@ -60,8 +59,7 @@ function onKey(key) {
   }
 }
 
-function fillTile(letter) {
-
+function fillTile (letter) {
   // console.log(currentRow);
 
   for (const tile of currentRow.value) {
@@ -72,7 +70,7 @@ function fillTile(letter) {
   }
 }
 
-function clearTile() {
+function clearTile () {
   for (const tile of [...currentRow.value].reverse()) {
     if (tile.letter) {
       tile.letter = ''
@@ -81,9 +79,9 @@ function clearTile() {
   }
 }
 
-function completeRow() {
-  if (currentRow.value.every((tile) => tile.letter)) {
-    const guess = currentRow.value.map((tile) => tile.letter).join('')
+function completeRow () {
+  if (currentRow.value.every(tile => tile.letter)) {
+    const guess = currentRow.value.map(tile => tile.letter).join('')
     if (!allWords.includes(guess) && guess !== answer) {
       shake()
       showMessage(`La palabra no está en la lista`)
@@ -99,7 +97,7 @@ function completeRow() {
       }
     })
     // Segundo paso: marcar las letras presentes
-    currentRow.value.forEach((tile) => {
+    currentRow.value.forEach(tile => {
       if (!tile.state && answerLetters.includes(tile.letter)) {
         tile.state = LetterState.PRESENT
         answerLetters[answerLetters.indexOf(tile.letter)] = null
@@ -109,7 +107,7 @@ function completeRow() {
       }
     })
     // Tercer paso: marcar las letras ausentes
-    currentRow.value.forEach((tile) => {
+    currentRow.value.forEach(tile => {
       if (!tile.state) {
         tile.state = LetterState.ABSENT
         if (!letterStates[tile.letter]) {
@@ -119,12 +117,14 @@ function completeRow() {
     })
 
     allowInput = false
-    if (currentRow.value.every((tile) => tile.state === LetterState.CORRECT)) {
+    if (currentRow.value.every(tile => tile.state === LetterState.CORRECT)) {
       // Ganaste!!
       setTimeout(() => {
         grid.value = genResultGrid()
         showMessage(
-          ['Genio', 'Magnífico', 'Impresionante', 'Espléndido', 'Bien', '¡Uf!'][currentRowIndex.value],
+          ['Genio', 'Magnífico', 'Impresionante', 'Espléndido', 'Bien', '¡Uf!'][
+            currentRowIndex.value
+          ],
           -1
         )
         success.value = true
@@ -147,7 +147,7 @@ function completeRow() {
   }
 }
 
-function showMessage(msg, time = 1000) {
+function showMessage (msg, time = 1000) {
   message.value = msg
   if (time > 0) {
     setTimeout(() => {
@@ -156,7 +156,7 @@ function showMessage(msg, time = 1000) {
   }
 }
 
-function shake() {
+function shake () {
   shakeRowIndex.value = currentRowIndex.value
   setTimeout(() => {
     shakeRowIndex.value = -1
@@ -170,11 +170,11 @@ const icons = {
   [LetterState.INITIAL]: null
 }
 
-function genResultGrid() {
+function genResultGrid () {
   return board.value
     .slice(0, currentRowIndex.value + 1)
-    .map((row) => {
-      return row.map((tile) => icons[tile.state]).join('')
+    .map(row => {
+      return row.map(tile => icons[tile.state]).join('')
     })
     .join('\n')
 }
@@ -189,22 +189,51 @@ function genResultGrid() {
   </Transition>
   <header>
     <h1>WORDLE ESPAÑOL</h1>
-    <a id="source-link" href="https://github.com/Ameth/vue-wordle" target="_blank">Source</a>
+    <a
+      id="source-link"
+      href="htps://github.com/Ameth/vue-wordle"
+      target="_blank"
+      class="source-link"
+      ><svg
+        xmlns="http://www.w3.org/2000/svg"
+        xmlns:xlink="http://www.w3.org/1999/xlink"
+        aria-hidden="true"
+        role="img"
+        width="32"
+        height="32"
+        preserveAspectRatio="xMidYMid meet"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M12 2.247a10 10 0 0 0-3.162 19.487c.5.088.687-.212.687-.475c0-.237-.012-1.025-.012-1.862c-2.513.462-3.163-.613-3.363-1.175a3.636 3.636 0 0 0-1.025-1.413c-.35-.187-.85-.65-.013-.662a2.001 2.001 0 0 1 1.538 1.025a2.137 2.137 0 0 0 2.912.825a2.104 2.104 0 0 1 .638-1.338c-2.225-.25-4.55-1.112-4.55-4.937a3.892 3.892 0 0 1 1.025-2.688a3.594 3.594 0 0 1 .1-2.65s.837-.262 2.75 1.025a9.427 9.427 0 0 1 5 0c1.912-1.3 2.75-1.025 2.75-1.025a3.593 3.593 0 0 1 .1 2.65a3.869 3.869 0 0 1 1.025 2.688c0 3.837-2.338 4.687-4.563 4.937a2.368 2.368 0 0 1 .675 1.85c0 1.338-.012 2.413-.012 2.75c0 .263.187.575.687.475A10.005 10.005 0 0 0 12 2.247z"
+          fill="currentColor"
+        />
+      </svg>
+    </a>
   </header>
   <div id="board">
-    <div v-for="(row, index) in board" :class="[
-      'row',
-      shakeRowIndex === index && 'shake',
-      success && currentRowIndex === index && 'jump'
-    ]">
-      <div v-for="(tile, index) in row" :class="['tile', tile.letter && 'filled', tile.state && 'revealed']">
+    <div
+      v-for="(row, index) in board"
+      :class="[
+        'row',
+        shakeRowIndex === index && 'shake',
+        success && currentRowIndex === index && 'jump'
+      ]"
+    >
+      <div
+        v-for="(tile, index) in row"
+        :class="['tile', tile.letter && 'filled', tile.state && 'revealed']"
+      >
         <div class="front" :style="{ transitionDelay: `${index * 300}ms` }">
           {{ tile.letter }}
         </div>
-        <div :class="['back', tile.state]" :style="{
-          transitionDelay: `${index * 300}ms`,
-          animationDelay: `${index * 100}ms`
-        }">
+        <div
+          :class="['back', tile.state]"
+          :style="{
+            transitionDelay: `${index * 300}ms`,
+            animationDelay: `${index * 100}ms`
+          }"
+        >
           {{ tile.letter }}
         </div>
       </div>
@@ -224,6 +253,7 @@ function genResultGrid() {
   height: var(--height);
   width: min(350px, calc(var(--height) / 6 * 5));
   margin: 0px auto;
+  color: #eff3f8;
 }
 
 .message {

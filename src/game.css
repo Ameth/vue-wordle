@@ -1,19 +1,31 @@
 body {
-  font-family: 'Clear Sans', 'Helvetica Neue', Arial, sans-serif;
+  font-family: "Clear Sans", "Helvetica Neue", Arial, sans-serif;
   text-align: center;
   max-width: 500px;
   margin: 0px auto;
+  background-color: #121f3d;
 }
 
 h1 {
   margin: 4px 0;
   font-size: 36px;
+  color: #eff3f8;
 }
 
 header {
   border-bottom: 1px solid #ccc;
   margin-bottom: 30px;
   position: relative;
+}
+
+.source-link {
+  background-color: transparent;
+  color: #33b1ff;
+  text-decoration: none;
+}
+
+.source-link:hover {
+  color: #81c9f7;
 }
 
 #source-link {

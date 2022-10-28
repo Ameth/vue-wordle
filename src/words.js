@@ -1,16 +1,16 @@
-const defaultMessage = ' Using word of the day instead.'
+const defaultMessage = 'Se usará la palabra del día en su lugar.'
 
 export function getWordOfTheDay() {
   if (location.search) {
     try {
       const query = atob(location.search.slice(1))
       if (query.length !== 5) {
-        alert(`Incorrect word length from encoded query. ${defaultMessage}`)
+        alert(`La longitud de la palabra codificada es incorrecta. ${defaultMessage}`)
       } else {
         return query
       }
     } catch (e) {
-      alert(`Malformed encoded word query. ${defaultMessage}`)
+      alert(`La palabra codificada no tiene el formato correcto. ${defaultMessage}`)
     }
   }
 
@@ -18,9 +18,12 @@ export function getWordOfTheDay() {
   const start = new Date(2022, 0, 0)
   const diff = Number(now) - Number(start)
   let day = Math.floor(diff / (1000 * 60 * 60 * 24))
-  while (day > answers.length) {
-    day -= answers.length
-  }
+  // while (day > answers.length) {
+  //   day -= answers.length 
+  // day = day - answers.length
+  // }
+  day = day % answers.length
+
   return answers[day]
 }
 

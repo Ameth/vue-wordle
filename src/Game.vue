@@ -191,7 +191,7 @@ function genResultGrid () {
     <h1>WORDLE ESPAÑOL</h1>
     <a
       id="source-link"
-      href="htps://github.com/Ameth/vue-wordle"
+      href="https://github.com/Ameth/vue-wordle"
       target="_blank"
       class="source-link"
       ><svg

@@ -1,13 +1,17 @@
 <script setup>
 import { onUnmounted, ref, computed, reactive } from 'vue'
-import { getWordOfTheDay, allWords } from './words'
-import Keyboard from './Keyboard.vue'
-import { LetterState } from './types'
+import { getWordOfTheDay, allWords } from '@/words'
+import Keyboard from '@/components/Keyboard.vue'
+import { LetterState } from '@/types'
+import GithubIcon from '@/icons/GithubIcon.vue'
+import InstructIcon from '@/icons/InstructIcon.vue'
+import SendIcon from '@/icons/SendIcon.vue'
+import Instructions from '@/components/Instructions.vue'
 
 // Get word of the day
 const answer = getWordOfTheDay()
 
-// console.log('answer day:', answer)
+console.log('Answer:', answer)
 
 // Board state. Each tile is represented as { letter, state }
 const board = ref(
@@ -30,6 +34,7 @@ let message = ref('')
 let grid = ref('')
 let shakeRowIndex = ref(-1)
 let success = ref(false)
+let isActiveModal = ref(false)
 
 // Keep track of revealed letters for the virtual keyboard
 const letterStates = reactive({})
@@ -82,11 +87,11 @@ function clearTile () {
 function completeRow () {
   if (currentRow.value.every(tile => tile.letter)) {
     const guess = currentRow.value.map(tile => tile.letter).join('')
-    if (!allWords.includes(guess) && guess !== answer) {
-      shake()
-      showMessage(`La palabra no está en la lista`)
-      return
-    }
+    // if (!allWords.includes(guess) && guess !== answer) {
+    //   shake()
+    //   showMessage(`La palabra no está en la lista`)
+    //   return
+    // }
 
     const answerLetters = answer.split('')
     // Primer paso: marcar las letras correctas
@@ -194,23 +199,25 @@ function genResultGrid () {
       href="https://github.com/Ameth/vue-wordle"
       target="_blank"
       class="source-link"
-      ><svg
-        xmlns="http://www.w3.org/2000/svg"
-        xmlns:xlink="http://www.w3.org/1999/xlink"
-        aria-hidden="true"
-        role="img"
-        width="32"
-        height="32"
-        preserveAspectRatio="xMidYMid meet"
-        viewBox="0 0 24 24"
-      >
-        <path
-          d="M12 2.247a10 10 0 0 0-3.162 19.487c.5.088.687-.212.687-.475c0-.237-.012-1.025-.012-1.862c-2.513.462-3.163-.613-3.363-1.175a3.636 3.636 0 0 0-1.025-1.413c-.35-.187-.85-.65-.013-.662a2.001 2.001 0 0 1 1.538 1.025a2.137 2.137 0 0 0 2.912.825a2.104 2.104 0 0 1 .638-1.338c-2.225-.25-4.55-1.112-4.55-4.937a3.892 3.892 0 0 1 1.025-2.688a3.594 3.594 0 0 1 .1-2.65s.837-.262 2.75 1.025a9.427 9.427 0 0 1 5 0c1.912-1.3 2.75-1.025 2.75-1.025a3.593 3.593 0 0 1 .1 2.65a3.869 3.869 0 0 1 1.025 2.688c0 3.837-2.338 4.687-4.563 4.937a2.368 2.368 0 0 1 .675 1.85c0 1.338-.012 2.413-.012 2.75c0 .263.187.575.687.475A10.005 10.005 0 0 0 12 2.247z"
-          fill="currentColor"
-        />
-      </svg>
+      title="Github"
+    >
+      <GithubIcon />
     </a>
   </header>
+  <div class="icons">
+    <a
+      id="instructions"
+      href="#"
+      title="Instrucciones"
+      class="icon-link"
+      @click="isActiveModal = true"
+    >
+      <InstructIcon />
+    </a>
+    <a id="send" href="#" title="Retar a un amigo" class="icon-link">
+      <SendIcon />
+    </a>
+  </div>
   <div id="board">
     <div
       v-for="(row, index) in board"
@@ -240,6 +247,13 @@ function genResultGrid () {
     </div>
   </div>
   <Keyboard @key="onKey" :letter-states="letterStates" />
+  <div class="overlay" id="overlay" :class="{ active: isActiveModal }"></div>
+  <div class="modal" id="modal" :class="{ active: isActiveModal }">
+    <div class="modal-content">
+      <button class="btn-close-modal" @click="isActiveModal = false">X</button>
+      <Instructions />
+    </div>
+  </div>
 </template>
 
 <style scoped>

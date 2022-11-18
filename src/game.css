@@ -14,8 +14,28 @@ h1 {
 
 header {
   border-bottom: 1px solid #ccc;
-  margin-bottom: 30px;
+  margin-bottom: 10px;
   position: relative;
+}
+
+.icons {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.icons > .icon-link {
+  margin: 0px 5px 0px 5px;
+}
+
+.icon-link {
+  background-color: transparent;
+  color: #83d988;
+  text-decoration: none;
+}
+
+.icon-link:hover {
+  color: #a9f0ad;
 }
 
 .source-link {
@@ -34,6 +54,18 @@ header {
   top: 0.5em;
 }
 
+/*#instructions {
+  position: absolute;
+  left: 0;
+  top: 0.5em;
+}
+
+#send {
+  position: absolute;
+  right: 35;
+  top: 0.5em;
+} */
+
 .correct,
 .present,
 .absent {
@@ -50,4 +82,74 @@ header {
 
 .absent {
   background-color: #787c7e !important;
+}
+
+.overlay {
+  background: rgba(0, 0, 0, 0.5);
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /*transition: 300s ease-in;*/
+  /*opacity: 0;*/
+  /*visibility: hidden;*/
+  display: none;
+}
+
+.modal {
+  width: 500px;
+  height: 600px;
+  background: black;
+  padding: 2em;
+  border-radius: 0.5em;
+  text-align: left;
+  z-index: 2;
+  /* transform: translateY(-3000px); */
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+  overflow: auto;
+  /* display: flex; */
+  display: none;
+  /* justify-content: center; */
+  flex-direction: column;
+  opacity: 0.9;
+}
+
+.modal-content {
+  display: flex;
+  color: white;
+  flex-direction: column;
+}
+
+.modal-content p {
+  align-self: center;
+}
+
+.btn-close-modal {
+  position: sticky;
+  background-color: red;
+  color: white;
+  font-size: 1.3em;
+  border-radius: 4px;
+  height: 30px;
+  width: 30px;
+  text-align: center;
+  top: 0;
+  right: 0;
+  left: 500px;
+  border: 0px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.active {
+  display: flex;
 }

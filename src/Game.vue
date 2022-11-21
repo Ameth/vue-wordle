@@ -13,7 +13,7 @@ import { showMessage, message } from '@/store/store.js'
 // Get word of the day
 const answer = getWordOfTheDay()
 
-console.log('Answer:', answer)
+// console.log('Answer:', answer)
 
 // Board state. Each tile is represented as { letter, state }
 const board = ref(

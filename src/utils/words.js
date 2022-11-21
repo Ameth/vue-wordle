@@ -1,4 +1,4 @@
-const defaultMessage = "Se usará la palabra del día en su lugar.";
+const defaultMessage = "Se usará una palabra aleatoria en su lugar.";
 
 const aleatorio = (min, max) => {
   // Generar un número aleatorio entre dos números, inclusives

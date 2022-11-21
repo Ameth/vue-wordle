@@ -1,12 +1,14 @@
 <script setup>
 import { onUnmounted, ref, computed, reactive } from 'vue'
-import { getWordOfTheDay, allWords } from '@/words'
+import { getWordOfTheDay, allWords } from '@/utils/words'
 import Keyboard from '@/components/Keyboard.vue'
-import { LetterState } from '@/types'
+import { LetterState } from '@/utils/types'
 import GithubIcon from '@/icons/GithubIcon.vue'
 import InstructIcon from '@/icons/InstructIcon.vue'
 import SendIcon from '@/icons/SendIcon.vue'
 import Instructions from '@/components/Instructions.vue'
+import Send from '@/components/Send.vue'
+import { showMessage, message } from '@/store/store.js'
 
 // Get word of the day
 const answer = getWordOfTheDay()
@@ -30,17 +32,18 @@ const currentRow = computed(() => board.value[currentRowIndex.value])
 // console.log("current:", currentRow.value);
 
 // Feedback state: message and shake
-let message = ref('')
+// let message = ref('')
 let grid = ref('')
 let shakeRowIndex = ref(-1)
 let success = ref(false)
 let isActiveModal = ref(false)
+let modalInfo = ref('')
 
 // Keep track of revealed letters for the virtual keyboard
 const letterStates = reactive({})
 
 // Handle keyboard input.
-let allowInput = true
+let allowInput = ref(true)
 
 const onKeyup = e => {
   // console.log(e.key);
@@ -54,7 +57,7 @@ onUnmounted(() => {
 })
 
 function onKey (key) {
-  if (!allowInput) return
+  if (!allowInput.value) return
   if (/^[a-zA-Z\u00f1\u00d1]$/.test(key)) {
     fillTile(key.toLowerCase())
   } else if (key === 'Backspace') {
@@ -121,7 +124,7 @@ function completeRow () {
       }
     })
 
-    allowInput = false
+    allowInput.value = false
     if (currentRow.value.every(tile => tile.state === LetterState.CORRECT)) {
       // Ganaste!!
       setTimeout(() => {
@@ -138,7 +141,7 @@ function completeRow () {
       // Ir a la siguiente fila
       currentRowIndex.value++
       setTimeout(() => {
-        allowInput = true
+        allowInput.value = true
       }, 1600)
     } else {
       // Juego perdido :(
@@ -152,14 +155,14 @@ function completeRow () {
   }
 }
 
-function showMessage (msg, time = 1000) {
-  message.value = msg
-  if (time > 0) {
-    setTimeout(() => {
-      message.value = ''
-    }, time)
-  }
-}
+// function showMessage (msg, time = 1000) {
+//   message.value = msg
+//   if (time > 0) {
+//     setTimeout(() => {
+//       message.value = ''
+//     }, time)
+//   }
+// }
 
 function shake () {
   shakeRowIndex.value = currentRowIndex.value
@@ -210,11 +213,19 @@ function genResultGrid () {
       href="#"
       title="Instrucciones"
       class="icon-link"
-      @click="isActiveModal = true"
+      @click=";(isActiveModal = true), (modalInfo = 'Inst')"
     >
       <InstructIcon />
     </a>
-    <a id="send" href="#" title="Retar a un amigo" class="icon-link">
+    <a
+      id="send"
+      href="#"
+      title="Retar a un amigo"
+      class="icon-link"
+      @click="
+        ;(isActiveModal = true), (modalInfo = 'Send'), (allowInput = false)
+      "
+    >
       <SendIcon />
     </a>
   </div>
@@ -250,8 +261,14 @@ function genResultGrid () {
   <div class="overlay" id="overlay" :class="{ active: isActiveModal }"></div>
   <div class="modal" id="modal" :class="{ active: isActiveModal }">
     <div class="modal-content">
-      <button class="btn-close-modal" @click="isActiveModal = false">X</button>
-      <Instructions />
+      <button
+        class="btn-close-modal"
+        @click=";(isActiveModal = false), (modalInfo = ''), (allowInput = true)"
+      >
+        X
+      </button>
+      <Instructions v-if="modalInfo == 'Inst'" />
+      <Send v-if="modalInfo == 'Send'" />
     </div>
   </div>
 </template>

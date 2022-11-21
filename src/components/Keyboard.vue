@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import { LetterState } from '@/types'
+import { LetterState } from '@/utils/types'
 
 const props = defineProps(['letterStates'])
 

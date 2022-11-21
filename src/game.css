@@ -107,7 +107,7 @@ header {
   padding: 2em;
   border-radius: 0.5em;
   text-align: left;
-  z-index: 2;
+  z-index: 1;
   /* transform: translateY(-3000px); */
   position: absolute;
   left: 0;
@@ -127,10 +127,6 @@ header {
   display: flex;
   color: white;
   flex-direction: column;
-}
-
-.modal-content p {
-  align-self: center;
 }
 
 .btn-close-modal {

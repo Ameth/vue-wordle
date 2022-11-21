@@ -14,7 +14,7 @@ export function getWordOfTheDay() {
           `La longitud de la palabra codificada es incorrecta. ${defaultMessage}`
         );
       } else {
-        return query;
+        return query.toLowerCase();
       }
     } catch (e) {
       alert(

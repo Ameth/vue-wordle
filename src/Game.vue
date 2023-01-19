@@ -1,8 +1,9 @@
 <script setup>
 import { onUnmounted, ref, computed, reactive } from 'vue'
+import confetti from 'canvas-confetti'
 import { getWordOfTheDay, allWords } from '@/utils/words'
 import Keyboard from '@/components/Keyboard.vue'
-import { LetterState } from '@/utils/types'
+import { LetterState, resultWords } from '@/utils/types'
 import GithubIcon from '@/icons/GithubIcon.vue'
 import InstructIcon from '@/icons/InstructIcon.vue'
 import SendIcon from '@/icons/SendIcon.vue'
@@ -56,7 +57,7 @@ onUnmounted(() => {
   window.removeEventListener('keyup', onKeyup)
 })
 
-function onKey (key) {
+function onKey(key) {
   if (!allowInput.value) return
   if (/^[a-zA-Z\u00f1\u00d1]$/.test(key)) {
     fillTile(key.toLowerCase())
@@ -67,7 +68,7 @@ function onKey (key) {
   }
 }
 
-function fillTile (letter) {
+function fillTile(letter) {
   // console.log(currentRow);
 
   for (const tile of currentRow.value) {
@@ -78,7 +79,7 @@ function fillTile (letter) {
   }
 }
 
-function clearTile () {
+function clearTile() {
   for (const tile of [...currentRow.value].reverse()) {
     if (tile.letter) {
       tile.letter = ''
@@ -87,7 +88,7 @@ function clearTile () {
   }
 }
 
-function completeRow () {
+function completeRow() {
   if (currentRow.value.every(tile => tile.letter)) {
     const guess = currentRow.value.map(tile => tile.letter).join('')
     // if (!allWords.includes(guess) && guess !== answer) {
@@ -129,13 +130,9 @@ function completeRow () {
       // Ganaste!!
       setTimeout(() => {
         grid.value = genResultGrid()
-        showMessage(
-          ['Genio', 'Magnífico', 'Impresionante', 'Espléndido', 'Bien', '¡Uf!'][
-            currentRowIndex.value
-          ],
-          -1
-        )
+        showMessage(resultWords[currentRowIndex.value], -1)
         success.value = true
+        confetti()
       }, 1600)
     } else if (currentRowIndex.value < board.value.length - 1) {
       // Ir a la siguiente fila
@@ -164,7 +161,7 @@ function completeRow () {
 //   }
 // }
 
-function shake () {
+function shake() {
   shakeRowIndex.value = currentRowIndex.value
   setTimeout(() => {
     shakeRowIndex.value = -1
@@ -178,7 +175,7 @@ const icons = {
   [LetterState.INITIAL]: null
 }
 
-function genResultGrid () {
+function genResultGrid() {
   return board.value
     .slice(0, currentRowIndex.value + 1)
     .map(row => {
@@ -197,61 +194,35 @@ function genResultGrid () {
   </Transition>
   <header>
     <h1>WORDLE ESPAÑOL</h1>
-    <a
-      id="source-link"
-      href="https://github.com/Ameth/vue-wordle"
-      target="_blank"
-      class="source-link"
-      title="Github"
-    >
+    <a id="source-link" href="https://github.com/Ameth/vue-wordle" target="_blank" class="source-link" title="Github">
       <GithubIcon />
     </a>
   </header>
   <div class="icons">
-    <a
-      id="instructions"
-      href="#"
-      title="Instrucciones"
-      class="icon-link"
-      @click=";(isActiveModal = true), (modalInfo = 'Inst')"
-    >
+    <a id="instructions" href="#" title="Instrucciones" class="icon-link"
+      @click="; (isActiveModal = true), (modalInfo = 'Inst')">
       <InstructIcon />
     </a>
-    <a
-      id="send"
-      href="#"
-      title="Retar a un amigo"
-      class="icon-link"
-      @click="
-        ;(isActiveModal = true), (modalInfo = 'Send'), (allowInput = false)
-      "
-    >
+    <a id="send" href="#" title="Retar a un amigo" class="icon-link" @click="
+                  ; (isActiveModal = true), (modalInfo = 'Send'), (allowInput = false)
+                ">
       <SendIcon />
     </a>
-  </div>
-  <div id="board">
-    <div
-      v-for="(row, index) in board"
-      :class="[
-        'row',
-        shakeRowIndex === index && 'shake',
-        success && currentRowIndex === index && 'jump'
-      ]"
-    >
-      <div
-        v-for="(tile, index) in row"
-        :class="['tile', tile.letter && 'filled', tile.state && 'revealed']"
-      >
-        <div class="front" :style="{ transitionDelay: `${index * 300}ms` }">
-          {{ tile.letter }}
-        </div>
-        <div
-          :class="['back', tile.state]"
-          :style="{
-            transitionDelay: `${index * 300}ms`,
-            animationDelay: `${index * 100}ms`
-          }"
-        >
+    </div>
+    <div id="board">
+      <div v-for="(row, index) in board" :class="[
+                  'row',
+                  shakeRowIndex === index && 'shake',
+                  success && currentRowIndex === index && 'jump'
+                ]">
+        <div v-for="(tile, index) in row" :class="['tile', tile.letter && 'filled', tile.state && 'revealed']">
+          <div class="front" :style="{ transitionDelay: `${index * 300}ms` }">
+            {{ tile.letter }}
+          </div>
+          <div :class="['back', tile.state]" :style="{
+                      transitionDelay: `${index * 300}ms`,
+                      animationDelay: `${index * 100}ms`
+        }">
           {{ tile.letter }}
         </div>
       </div>
@@ -261,10 +232,7 @@ function genResultGrid () {
   <div class="overlay" id="overlay" :class="{ active: isActiveModal }"></div>
   <div class="modal" id="modal" :class="{ active: isActiveModal }">
     <div class="modal-content">
-      <button
-        class="btn-close-modal"
-        @click=";(isActiveModal = false), (modalInfo = ''), (allowInput = true)"
-      >
+      <button class="btn-close-modal" @click="; (isActiveModal = false), (modalInfo = ''), (allowInput = true)">
         X
       </button>
       <Instructions v-if="modalInfo == 'Inst'" />

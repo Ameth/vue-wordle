@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@types/marked": "^4.0.7",
+    "canvas-confetti": "^1.6.0",
     "marked": "^4.2.2",
     "vue": "^3.2.41"
   },
